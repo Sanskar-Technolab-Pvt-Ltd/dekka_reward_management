@@ -169,7 +169,9 @@ def check_user_registration(mobile_number):
         elif user_info:
             # If only User exists but not Mobile Verification
             return {
-                "registered": True,
+                "registered": False,
+                "activate":False,
+                "approved": False,
                 "message": "Your mobile number is not registered. Please complete the registration process to continue."
             }
 
@@ -177,6 +179,8 @@ def check_user_registration(mobile_number):
             # If neither Mobile Verification nor User exists for the mobile number
             return {
                 "registered": False,
+                "activate":False,
+                "approved": False,
                 "message": "Your mobile number is not registered. Please complete the registration process to continue."
             }
 
