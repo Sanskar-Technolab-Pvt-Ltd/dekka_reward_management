@@ -106,7 +106,7 @@ export const SidebarData = [
       },
       {
         title: 'Customer Details',
-        path: '/carpenter-details',
+        path: '/customer-details',
         icon: <VscCircle  />
       }
     ]

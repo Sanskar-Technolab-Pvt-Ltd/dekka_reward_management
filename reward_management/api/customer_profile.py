@@ -77,6 +77,8 @@ def check_email_exists(email):
         frappe.log_error(frappe.get_traceback(), _("API Error"))
         return {"status": "error", "message": str(e)}
 
+
+
 # update user profile and id--------
 @frappe.whitelist()
 def update_user_details():
@@ -326,5 +328,240 @@ def get_all_gender():
     except Exception as e:
         frappe.throw(_("Error fetching genders: {0}").format(str(e)))
         
+
+
+
         
+# get customer user detail for admin side customer details
+@frappe.whitelist()
+def show_customer_user(carpenterName):
+    try : 
+        # Fetch specific fields from User document based on email
+        user = frappe.get_value("User", {"mobile_no": carpenterName}, 
+                                ["name", "email", "first_name", "last_name", "full_name", "bio", "location", "mobile_no",
+                                 "gender", "birth_date","user_image"], as_dict=True)
+
+        if user:
+            # Return relevant user details as JSON
+            return {
+                "name": user.get("name"),
+                "email": user.get("email"),
+                "first_name": user.get("first_name"),
+                "last_name": user.get("last_name"),
+                "full_name": user.get("full_name"),
+                "mobile_no": user.get("mobile_no"),
+                "gender": user.get("gender"),
+                "birth_date": user.get("birth_date"),
+                "location": user.get("location"),
+                "user_image": user.get("user_image" or "")
+            }
+        else:
+            return {
+                "success":False,
+                "message":"user not found for this mobile number"
+            }
+            # frappe.throw(_("User not found for email: {0}").format(carpenterName))
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("API Error"))
+        raise frappe.ValidationError(_("Error fetching user details: {0}").format(str(e)))
+    
+    
+    
+# update customer profile through admin---------------
+@frappe.whitelist()
+def update_customer_details():
+    try:
+        user_data = frappe.form_dict
+        new_email = user_data.get('name')
+        old_email = user_data.get('old_email')
+        
+        if not old_email:
+            return {"status": "error", "message": "Old email is required."}
+
+        # Fetch User document based on the old email
+        users = frappe.get_all("User", filters={"email": old_email}, limit=1)
+        if not users:
+            return {"status": "error", "message": "User not found."}
+
+        user = frappe.get_doc("User", users[0]["name"])
+
+        if not user.enabled:
+            return {"status": "error", "message": f"User {old_email} is disabled. Please contact your System Manager."}
+
+        if old_email != new_email:
+            
+            # Logout and clear session for the old email user before renaming
+            # frappe.local.login_manager.logout(user=old_email)
+            # clear_sessions(user=old_email, force=True)
+            
+            user.first_name = user_data.get('first_name', user.first_name)
+            user.last_name = user_data.get('last_name', user.last_name)
+            user.full_name = user_data.get('full_name', user.full_name)
+            user.mobile_no = user_data.get('mobile_no', user.mobile_no)
+            user.gender = user_data.get('gender', user.gender)
+            user.birth_date = user_data.get('birth_date', user.birth_date)
+            user.location = user_data.get('location', user.location)
+            
+            # Clear session for the old email before renaming
+            # frappe.local.login_manager.logout(user=old_email)
+            # clear_sessions(user=old_email, force=True)
+            user.save()
+            
+            # Check for carpenter document and update it similarly
+            if user.mobile_no:
+                customer = frappe.get_all(
+                    "Customer", 
+                    filters={"mobile_number": user.mobile_no}, 
+                    fields=["name"]
+                )
+
+                if customer:
+                    customer_doc = frappe.get_doc("Customer", customer[0]["name"])
+                    customer_doc.first_name = user.first_name
+                    customer_doc.last_name = user.last_name
+                    customer_doc.full_name = user.full_name
+                    customer_doc.city = user.location
+                    customer_doc.email = new_email
+                    customer_doc.gender = user.gender
+                    customer_doc.birth_date = user.birth_date
+
+                    if user_data.get('user_image'):
+                        customer_doc.image = user_data.get('user_image')
+                     # Clear FCM token on logout
+                    customer_doc.fcm_token = ""
+                    # clear web fcm token on logout
+                    customer_doc.web_fcm_token = ""
+                    
+                    customer_doc.save()
+
+            # Clear session for the old email before renaming
+            frappe.local.login_manager.logout(user=old_email)
+            clear_sessions(user=old_email, force=True)
+
+            # Rename the User document and update the email
+            frappe.rename_doc("User", old_email, new_email)
+            user.email = new_email
+            user.save()
+            
+            # Return response to trigger reload and cache clear on the frontend
+            return {
+                "status": "success", 
+                "message": "Email changed, reload required.", 
+                "reload_required": False,
+                "username": user.name,
+            }
+        
+        # If emails match, just update user details
+        user.first_name = user_data.get('first_name', user.first_name)
+        user.last_name = user_data.get('last_name', user.last_name)
+        user.full_name = user_data.get('full_name', user.full_name)
+        user.mobile_no = user_data.get('phone', user.mobile_no)
+        user.gender = user_data.get('gender', user.gender)
+        user.birth_date = user_data.get('birth_date', user.birth_date)
+        user.location = user_data.get('location', user.location)
+        user.save()
+
+        # Check for carpenter document and update it similarly
+        if user.mobile_no:
+            customer = frappe.get_all(
+                "Customer", 
+                filters={"mobile_number": user.mobile_no}, 
+                fields=["name"]
+            )
+
+            if customer:
+                customer_doc = frappe.get_doc("Customer", customer[0]["name"])
+                customer_doc.first_name = user.first_name
+                customer_doc.last_name = user.last_name
+                customer_doc.full_name = user.full_name
+                customer_doc.city = user.location
+                customer_doc.gender = user.gender
+                customer_doc.birth_date = user.birth_date
+
+                if user_data.get('user_image'):
+                    customer_doc.image = user_data.get('user_image')
+                
+                customer_doc.save()
+
+        return {"status": "success", "message": "Customer details updated successfully."}
+    except frappe.DoesNotExistError:
+        frappe.log_error(frappe.get_traceback(), _("User Not Found Error"))
+        return {"status": "error", "message": "User not found.","user":user.name,"new_user":new_email}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("API Error"))
+        return {"status": "error", "message": str(e)}
+    
+    
+# Change Carpenter Profile Image thorugh Admin-------------------------
+@frappe.whitelist()
+def update_customer_image(name, new_image_url):
+    try:
+        # Fetch User document based on name
+        user = frappe.get_doc("User", {"mobile_no": name})
+
+        # Update user image field
+        user.user_image = new_image_url
+
+        # Save User document changes
+        user.save()
+
+        # Now fetch and update the corresponding Carpenter document using the existing mobile_no
+        if user.mobile_no:
+            customer = frappe.get_all(
+                "Customer", 
+                filters={"mobile_number": user.mobile_no}, 
+                fields=["name"]
+            )
+
+            if customer:
+                customer_doc = frappe.get_doc("Customer", customer[0]["name"])
+
+                # Update Customer's image field (assuming 'image' is the field name for the image in Customer)
+                customer_doc.image = new_image_url
+                # Save Customer document changes
+                customer_doc.save()
+
+        return {"status": "success", "message": "Customer image updated successfully."}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("API Error"))
+        return {"status": "error", "message": str(e)}
+
+        
+    
+# Remove Carpenter Profile Image through Admin-------------
+@frappe.whitelist()
+def remove_customer_image(name):
+    try:    
+        # Fetch User document based on name
+        user = frappe.get_doc("User", {"mobile_no": name})
+
+        # Reset or remove user's image
+        user.user_image = None  
+
+        # Save User document changes
+        user.save()
+
+        # Now fetch and update the corresponding Carpenter document using the existing mobile_no
+        if user.mobile_no:
+            customer = frappe.get_all(
+                "Customer", 
+                filters={"mobile_number": user.mobile_no}, 
+                fields=["name"]
+            )
+
+            if customer:
+                customer_doc = frappe.get_doc("Customer", customer[0]["name"])
+
+                # Reset or remove Customer's image field (assuming 'image' is the field name for image in Customer)
+                customer_doc.image = None
+                # Save Carpenter document changes
+                customer_doc.save()
+
+        return {"status": "success", "message": "Customer image removed successfully."}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("API Error"))
+        return {"status": "error", "message": str(e)}
         

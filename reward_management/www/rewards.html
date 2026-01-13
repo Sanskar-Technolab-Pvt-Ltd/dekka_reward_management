@@ -5,11 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reward Management</title>
-    <script type="module" crossorigin src="/assets/reward_management/frontend/assets/index-9csb8hzT.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/reward_management/frontend/assets/index-BmCkt9gV.css">
+    <script type="module" crossorigin src="/assets/reward_management/frontend/assets/index-D3ztyfYX.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/reward_management/frontend/assets/index-CdVLVORB.css">
   </head>
   <body>
     <div id="root"></div>
-		<script>window.csrf_token = '{{ frappe.session.csrf_token }}';</script>
+		<!-- <script>window.csrf_token = '{{ frappe.session.csrf_token }}';</script> -->
+     <script>window.csrf_token = '{{ frappe.session.csrf_token }}';
+      if (!window.frappe) window.frappe = {};
+      frappe.boot = JSON.parse({{ boot }});
+    </script>
   </body>
 </html>

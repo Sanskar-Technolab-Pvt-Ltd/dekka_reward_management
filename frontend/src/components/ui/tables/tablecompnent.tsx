@@ -4,6 +4,7 @@ interface TableProps<T> {
     columns: Array<{
         header: string;
         accessor: keyof T;
+        link?: string;
     }>;
     data: T[];
     currentPage: number;
@@ -122,7 +123,7 @@ const TableComponent = <T,>({
                             <td className="p-3 text-defaultsize font-medium text-center text-defaulttextcolor whitespace-nowrap border border-gray-300 ">
                                 {indexOfFirstItem + index + 1}
                             </td>
-                            {columns.map((column) => (
+                            {/* {columns.map((column) => (
                                 <td
                                     key={column.accessor as string}
                                     className={`p-3  text-defaultsize font-medium whitespace-nowrap border border-gray-300 ${columnStyles[column.header] || 'text-defaulttextcolor'}  ${getColumnColorClass(item[column.accessor], column.accessor)}`}
@@ -131,7 +132,29 @@ const TableComponent = <T,>({
                                         ? stripHtmlTags(item[column.accessor] as string)
                                         : item[column.accessor]}
                                 </td>
-                            ))}
+                            ))} */}
+
+
+                             {columns.map((column) => (
+                                    <td
+                                        key={column.accessor as string}
+                                        className={`p-3 text-defaultsize font-medium whitespace-nowrap border border-gray-300 ${columnStyles[column.header] || 'text-defaulttextcolor'} ${getColumnColorClass(item[column.accessor], column.accessor)}`}
+                                    >
+                                        {column.link ? (
+                                            <Link
+                                                to={column.link.replace(/:(\w+)/g, (_, key) => {
+                                                    const value = item[key];
+                                                    return value ? value.replace(/\s+/g, '_') : key;
+                                                })}
+                                                className="text-defaulttextcolor hover:underline hover:text-primary"
+                                            >
+                                                {item[column.accessor]}
+                                            </Link>
+                                        ) : (
+                                            item[column.accessor]
+                                        )}
+                                    </td>
+                                ))}
                             {showProductQR && (
                                 <td className="p-3 text-defaultsize font-medium text-defaulttextcolor whitespace-nowrap border border-gray-300 ">
                                     <Link

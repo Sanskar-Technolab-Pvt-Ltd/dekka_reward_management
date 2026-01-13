@@ -56,6 +56,7 @@ import PointDetails from './pages/carpenter/PointDetails.tsx';
 import CompanyAddress from './pages/admin/contactus/ContactUs.tsx';
 import ProductCatagory from './pages/admin/productcatalogue/ProductCatalogue.tsx';
 import Project from './pages/admin/projectdashboard/Projects.tsx';
+import CustomerProfileEdit from './pages/admin/carpenterdashboard/CustomerProfile.tsx';
 
 function App() {
   const [isSidebarActive, setIsSidebarActive] = useState(false);
@@ -66,17 +67,24 @@ function App() {
     
   };
 
-  const getSiteName = () => {
+  // const getSiteName = () => {
 
-    // @ts-ignore
-    if (window.frappe?.boot?.versions?.frappe && (window.frappe.boot.versions.frappe.startsWith('15') || window.frappe.boot.versions.frappe.startsWith('16'))) {
-      // @ts-ignore
-      return window.frappe?.boot?.sitename ?? import.meta.env.VITE_SITE_NAME
+  //   // @ts-ignore
+  //   if (window.frappe?.boot?.versions?.frappe && (window.frappe.boot.versions.frappe.startsWith('15') || window.frappe.boot.versions.frappe.startsWith('16'))) {
+  //     // @ts-ignore
+  //     return window.frappe?.boot?.sitename ?? import.meta.env.VITE_SITE_NAME
+  //   }
+  //   return import.meta.env.VITE_SITE_NAME
+
+  // }
+   const getSiteName = () => {
+    if (window.frappe?.boot?.versions?.frappe &&
+        (window.frappe.boot.versions.frappe.startsWith('15') ||
+         window.frappe.boot.versions.frappe.startsWith('16'))) {
+      return window.frappe?.boot?.sitename ?? import.meta.env.VITE_SITE_NAME;
     }
-    return import.meta.env.VITE_SITE_NAME
-
-  }
-
+    return import.meta.env.VITE_SITE_NAME;
+  };
   const AppLayout = () => (
     <>
       <div className={`page layout ${isSidebarActive ? 'sidebar-narrow' : 'sidebar-wide'}`}>
@@ -180,7 +188,7 @@ fetchWebsiteSettings();
           <Route path='/download-qr-code' element={<DownloadQRCode />} />
           <Route path='/customer-product-orders' element={<ProductOrders />}/>
           <Route path='/carpenter-registration' element={<CarpenterRegistration />} />
-          <Route path='/carpenter-details' element={<CarpenterDetails/>} />
+          <Route path='/customer-details' element={<CarpenterDetails/>} />
           <Route path='/redeemption-request' element={<CarpenterRewardRequest />} />
           <Route path='/redeem-history' element={<RedeemptionHistory />} />
           <Route path='/announcement' element={<AdminAnnouncement />} />
@@ -208,6 +216,7 @@ fetchWebsiteSettings();
           <Route path='/catalogue-products' element={<CatalogueProduct/>}/>
           <Route path='/contact-us' element={<Contact/>}/>
           <Route path ='/point-details' element={<PointDetails/>}/>
+          <Route path ='/edit-customer-profile/:customerId' element={<CustomerProfileEdit/>}/> 
           <Route path='*' element={<Navigate to="/" replace />} />
          
           

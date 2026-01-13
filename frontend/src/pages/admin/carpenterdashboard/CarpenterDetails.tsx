@@ -239,7 +239,9 @@ const CarpenterDetails: React.FC = () => {
                             <TableComponent<Carpenter>
                                 columns={[
                                     { header: 'Customer ID', accessor: 'name' },
-                                    { header: 'Customer Name', accessor: 'full_name' },  
+                                    // { header: 'Customer Name', accessor: 'full_name' },
+                                    { header: 'Name', accessor: 'full_name', link: "/edit-customer-profile/:mobile_number" },
+  
                                     { header: 'Mobile Number', accessor: 'mobile_number' },
                                     { header: 'City', accessor: 'city' },
                                     { header: 'Total Points', accessor: 'total_points' },
