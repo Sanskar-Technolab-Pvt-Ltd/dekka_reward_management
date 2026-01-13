@@ -1,5 +1,3 @@
-# In reward_management/api/user_roles.py
-
 import frappe
 from frappe import _
 
