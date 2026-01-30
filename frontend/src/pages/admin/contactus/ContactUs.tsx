@@ -18,6 +18,7 @@ const notyf = new Notyf({
 });
 
 const SetContactUs: React.FC = () => {
+    const [companyName, setCompanyName] = useState<string>('');
     const [companyAddress, setCompanyAddress] = useState<string>('');
     const [companyEmail, setCompanyEmail] = useState<string>('');
     const [emailError, setEmailError] = useState<string>('');
@@ -26,6 +27,7 @@ const SetContactUs: React.FC = () => {
     const [companyMobile, setCompanyMobile] = useState<string[]>(['']);
     const [mobileErrors, setMobileErrors] = useState<string[]>(['']);
     const [companyAboutUs, setCompanyAboutUs] = useState<string>('');
+    const [currentCompanyName, setCurrentCompanyName] = useState<string>('');
     const [currentAddress, setCurrentAddress] = useState<string>('');
     const [currentEmail, setCurrentEmail] = useState<string>('');
     const [currentWebsite, setCurrentWebsite] = useState<string>('');
@@ -51,9 +53,9 @@ const SetContactUs: React.FC = () => {
 
                 if (response.data.message) {
                     const data = response.data.message;
-                    // console.log("company data", data);
-
-                    setCurrentAddress(data.address);
+                    console.log("company data", data);
+                    setCurrentCompanyName(data.company_name || '');
+                    setCurrentAddress(data.company_address || '');
                     setCurrentEmail(data.email || '');
                     setCurrentWebsite(data.website || '');
                     setCurrentMobile(data.mobile_numbers || ['']);
@@ -72,14 +74,33 @@ const SetContactUs: React.FC = () => {
     }, [showSuccessAlert]);
 
     useEffect(() => {
-        if (currentAddress && currentEmail && currentWebsite && currentMobile.length && currentAboutUs) {
-            setCompanyAddress(currentAddress);
-            setCompanyEmail(currentEmail);
-            setCompanyWebsite(currentWebsite);
-            setCompanyMobile(currentMobile);
-            setCompanyAboutUs(currentAboutUs);
-        }
-    }, [currentAddress, currentEmail, currentWebsite, currentMobile, currentAboutUs]);
+    if (currentCompanyName || currentAddress || currentEmail || currentWebsite || currentMobile.length || currentAboutUs) {
+        setCompanyName(currentCompanyName);
+        setCompanyAddress(currentAddress);
+        setCompanyEmail(currentEmail);
+        setCompanyWebsite(currentWebsite);
+        setCompanyMobile(currentMobile);
+        setCompanyAboutUs(currentAboutUs);
+    }
+}, [
+    currentCompanyName,
+    currentAddress,
+    currentEmail,
+    currentWebsite,
+    currentMobile,
+    currentAboutUs
+]);
+
+    // useEffect(() => {
+    //     if (currentAddress && currentEmail && currentWebsite && currentMobile.length && currentAboutUs) {
+    //         setCurrentCompanyName(currentCompanyName);
+    //         setCompanyAddress(currentAddress);
+    //         setCompanyEmail(currentEmail);
+    //         setCompanyWebsite(currentWebsite);
+    //         setCompanyMobile(currentMobile);
+    //         setCompanyAboutUs(currentAboutUs);
+    //     }
+    // }, [currentCompanyName,currentAddress, currentEmail, currentWebsite, currentMobile, currentAboutUs]);
 
     const addMobileNumber = () => {
         setCompanyMobile([...companyMobile, '']);
@@ -147,6 +168,10 @@ const SetContactUs: React.FC = () => {
         e.preventDefault();
 
         // Validate all fields before submission
+        if (!companyName){
+            notyf.error('Copmany name is required!');
+        }
+
         if (!companyAddress) {
             notyf.error('Company address is required!');
             return;
@@ -188,7 +213,8 @@ const SetContactUs: React.FC = () => {
         }
 
         const data = {
-            address: companyAddress,
+            company_name :companyName,
+            company_address: companyAddress,
             email: companyEmail,
             website: companyWebsite,
             mobile_numbers: companyMobile.filter(m => m),
@@ -225,6 +251,7 @@ const SetContactUs: React.FC = () => {
                     <div className="xl:col-span-3 col-span-12 bg-white mt-5 rounded-lg shadow-lg p-6">
                         <div className=''>
                             <div className="box-header ">
+                                
                                 <div className="box-title text-center text-1rem font-semibold text-primary">
                                     Set Company Address
                                 </div>
@@ -232,6 +259,26 @@ const SetContactUs: React.FC = () => {
                             <div className="box-body w-[400px] max-w-[400px]">
                                 <form onSubmit={handleSubmit}>
                                     <div className="grid grid-cols-12 gap-4">
+                                        <div className="xl:col-span-12 col-span-12">
+                                            <label
+                                                htmlFor="companyName"
+                                                className="block text-sm text-defaulttextcolor font-semibold mb-1"
+                                            >
+                                                Company Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="companyName"
+                                                className="outline-none focus:outline-none focus:ring-0 no-outline focus:border-[#dadada] form-control w-full !rounded-md !bg-light text-defaulttextcolor text-xs font-medium "
+                                                placeholder="Enter company name"
+                                                value={companyName}
+                                                onChange={(e) => setCompanyName(e.target.value)}
+                                                required
+                                                onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity("Company name is required.")}
+                                                onInput={(e) => (e.target as HTMLInputElement).setCustomValidity("")}
+                                            />
+                                        </div>
+                                        {/* /address */}
                                         <div className="xl:col-span-12 col-span-12">
                                             <label
                                                 htmlFor="companyAddress"

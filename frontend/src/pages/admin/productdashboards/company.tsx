@@ -20,7 +20,7 @@ const CompanyDashboard: React.FC = () => {
     });
 
     useEffect(() => {
-        document.title = 'Company Dashboard';
+        document.title = 'QR instruction Dashboard';
 
         if (showSuccessAlert) {
             const timer = setTimeout(() => {
@@ -87,7 +87,7 @@ const CompanyDashboard: React.FC = () => {
 
     return (
         <>
-            <Pageheader currentpage={"Company"} />
+            <Pageheader currentpage={"QR instruction"} />
 
             <div className="grid grid-cols-12 gap-x-6 p-6">
                 <div className="col-span-12 flex justify-center items-center">
@@ -95,7 +95,7 @@ const CompanyDashboard: React.FC = () => {
                         
                         <div className="box-header text-center">
                             <div className="box-title text-1rem font-semibold text-primary">
-                                Set Company
+                                Set QR instruction
                             </div>
                         </div>
 
@@ -153,7 +153,7 @@ const CompanyDashboard: React.FC = () => {
                             </form>
                         </div>
 
-                        {showSuccessAlert && <SuccessAlert message="Company created successfully!" />}
+                        {showSuccessAlert && <SuccessAlert message="QR instruction added successfully!" />}
                     </div>
                 </div>
             </div>
