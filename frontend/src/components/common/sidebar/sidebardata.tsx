@@ -69,7 +69,7 @@ export const SidebarData = [
         cName: 'sub-nav'
       },
       {
-        title: 'Company',
+        title: 'QR instruction',
         path: '/company',
         icon: <VscCircle />,
         cName: 'sub-nav'

@@ -10,6 +10,7 @@
   "column_break_yvyu",
   "email",
   "address",
+  "company_address",
   "section_break_fkpp",
   "mobile",
   "about_company",
@@ -59,13 +60,18 @@
    "fieldname": "description",
    "fieldtype": "Long Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Small Text",
+   "label": "Company Address"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-22 11:40:22.498618",
+ "modified": "2026-01-27 16:46:30.865936",
  "modified_by": "Administrator",
  "module": "Reward Management",
  "name": "Company Address",
