@@ -238,93 +238,142 @@ const DownloadQRCode: React.FC = () => {
         }
     }
     // Full-page QR design
-    else if (selectedSize == "100") {
-    const imageWidth = 50;
-    const imageHeight = 50;
-    const rowSpacing = 5;
+        else if (selectedSize == "100") {
+        const imageWidth = 50;
+        const imageHeight = 50;
+        const rowSpacing = 5;
+        let pageHeight = imageHeight + rowSpacing + 20;
 
-    pdf = new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: [120, 95],
-    });
+        pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "mm",
+            format: [120, 95],
+        });
 
-    // Unicode font
-    pdf.addFileToVFS("NotoSans-Regular.ttf", NOTO_SANS_BASE64);
-    pdf.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
-    pdf.setFont("NotoSans", "normal");
+        // Unicode font
+        pdf.addFileToVFS("NotoSans-Regular.ttf", NOTO_SANS_BASE64);
+        pdf.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
+        pdf.setFont("NotoSans", "normal");
 
-    selectedProduct.qr_code_images.forEach((image: any, index: number) => {
-        if (index > 0) pdf.addPage();
+        selectedProduct.qr_code_images.forEach((image: any, index: number) => {
+            if (index > 0) pdf.addPage();
 
-        const qrCodeID =
-            image.product_qr_id ||
-            image.qr_code_image.split("/").pop()?.replace(".png", "") ||
-            "QR-ID";
+            const qrCodeID =
+                image.product_qr_id ||
+                image.qr_code_image.split("/").pop()?.replace(".png", "") ||
+                "QR-ID";
 
-        const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageWidth = pdf.internal.pageSize.getWidth();
 
-        // -------- COMPANY NAME (TOP LEFT) --------
-        if (currentCompany){
-        pdf.setFontSize(14);
-        // pdf.text(
-        //     currentCompany || "Company Name",
-        //     5,
-        //     10
-        // );
-        const companyText = currentCompany || "Company Name";
-        const x = 5;
-        const y = 10;
+            // -------- COMPANY NAME (TOP LEFT) --------
+            if (currentCompany){
+            pdf.setFontSize(14);
+            // pdf.text(
+            //     currentCompany || "Company Name",
+            //     5,
+            //     10
+            // );
+            const companyText = currentCompany || "Company Name";
+            const x = 5;
+            const y = 10;
 
-        // draw text twice with slight offset
-        pdf.text(companyText, x, y);
-        pdf.text(companyText, x + 0.3, y);
+            // draw text twice with slight offset
+            pdf.text(companyText, x, y);
+            pdf.text(companyText, x + 0.3, y);
 
-        }
-        
-
-        // -------- QR IMAGE (CENTER) --------
-        const imageX = (pageWidth - imageWidth) / 2;
-        const imageY = 10;
-
-        pdf.addImage(
-            image.qr_code_image,
-            "PNG",
-            imageX,
-            imageY,
-            imageWidth,
-            imageHeight
-        );
-
-        // -------- QR CODE ID --------
-        pdf.setFontSize(13);
-        pdf.text(
-            qrCodeID,
-            pageWidth / 2,
-            imageY + imageHeight + rowSpacing + 2,
-            { align: "center" }
-        );
-
-        // -------- DESCRIPTION --------
-        if (currentDescription) {
-            pdf.setFontSize(11.5);
-            const descLines = pdf.splitTextToSize(
-                currentDescription,
-                pageWidth - 10
-            );
-
-            pdf.text(
-                descLines,
-                5,
-                imageY + imageHeight + rowSpacing + 8,
-                 {
-                lineHeightFactor: 1.2
             }
-            );
-        }
-    });
 
-    } else {
+            // // -------- PRODUCT NAME vertical left --------
+
+            if (selectedProduct.product_name) {
+                pdf.setFontSize(11); 
+
+                const productName = selectedProduct.product_name;
+                const baseX = 25;           // base left position
+                const baseY = pageHeight - 12;
+                const rightPadding = 5;    
+
+                if (productName.length > 10) {
+                    // Long text → wrap + keep only 5mm padding from QR
+                    const maxTextHeight = pageHeight - 20;
+
+                    const wrappedText = pdf.splitTextToSize(
+                        productName,
+                        maxTextHeight
+                    );
+
+                    pdf.text(
+                        wrappedText,
+                        baseX,
+                        baseY,
+                        { angle: 90 }
+                    );
+                } else {
+                    // Short text → slightly more centered
+                    pdf.text(
+                        productName,
+                        baseX + rightPadding,
+                        baseY - 10,
+                        { angle: 90 }
+                    );
+                }
+            }
+
+            //     const textX = 18; // Adjust horizontal position
+            //     const textY = pageHeight - 12; // Adjust vertical position
+            
+            //     if (selectedProduct.product_name && selectedProduct.product_name.length > 10) {
+            //         //  Wrap Product Name if Length > 10
+            //         const wrappedText = pdf.splitTextToSize(selectedProduct.product_name, pageHeight - 20);
+            //         pdf.text(wrappedText, textX, textY, { angle: 90 });
+            //     } else if (selectedProduct.product_name) {
+            //         //  Print Product Name Directly if Length ≤ 10
+            //         pdf.text(selectedProduct.product_name, textX+8, textY-10, { angle: 90 });
+            //     }
+            
+
+            // -------- QR IMAGE (CENTER) --------
+            const imageX = (pageWidth - imageWidth) / 2;
+            const imageY = 10;
+
+            pdf.addImage(
+                image.qr_code_image,
+                "PNG",
+                imageX,
+                imageY,
+                imageWidth,
+                imageHeight
+            );
+
+            // -------- QR CODE ID --------
+            pdf.setFontSize(13);
+            pdf.text(
+                qrCodeID,
+                pageWidth / 2,
+                imageY + imageHeight + rowSpacing + 2,
+                { align: "center" }
+            );
+
+            // -------- DESCRIPTION --------
+            if (currentDescription) {
+                pdf.setFontSize(11);
+                const descLines = pdf.splitTextToSize(
+                    currentDescription,
+                    pageWidth - 10
+                );
+
+                pdf.text(
+                    descLines,
+                    5,
+                    imageY + imageHeight + rowSpacing + 8,
+                    {
+                    lineHeightFactor: 1.5
+                }
+                );
+            }
+        });
+
+        } else {
         console.log("Invalid size selected.");
         return;
     }
